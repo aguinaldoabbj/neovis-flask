@@ -11,7 +11,14 @@ def index():
         return render_template('index.html', hostname=host_name, ip=host_ip)
     except:
         return render_template('error.html')
-
+    
+@app.route("/cypher/<cypher>")
+def init_cypher(cypher):
+    try:
+        return render_template('neo4j_vis.html', query=cypher)
+    except:
+        return render_template('error.html')
+        
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

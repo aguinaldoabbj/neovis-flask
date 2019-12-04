@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <title>Neo4j Visualization</title>
+        <meta charset="UTF-8">
+        <style type="text/css">
+          /*  #viz {
+                width: 900px;
+                height: 700px;
+            }*/
+        </style>
+        <script src="https://rawgit.com/neo4j-contrib/neovis.js/master/dist/neovis.js"></script>
+        <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous">
+        </script>
+    </head>
+    <script>
+        var input = '{{ query }}';
+        function draw() {
+            var config = {
+                container_id: "viz",
+                server_url: "bolt://10.7.40.134:7687",
+                server_user: "neo4j",
+                server_password: "neo1234",
+                //initial_cypher:"MATCH p=()-[]-() RETURN p",
+                initial_cypher: input,
+                arrows: false,
+                hierarchical_layout: true,
+                hierarchical_sort_method:"hubsize",
+                labels: {
+                    "Aircraft": {
+                         "caption": "name",
+                    },
+                    "Station": {
+                         "caption": "code",
+                    }
+                },
+                relationships: {
+                    "Landing": {
+                        "caption": true,
+                        "thickness": "times"
+                    },
+                    "Approach": {
+                        "caption": true,
+                        "thickness": "times"
+                    },
+                    "Take off": {
+                        "caption": true,
+                        "thickness": "times"                    
+                    },
+                    "Climb": {
+                        "caption": true,
+                        "thickness": "times"                    
+                    },
+                    "Unknown": {
+                        "caption": true,
+                        "thickness": "times" 
+                    }
+                }
+            };
+            var viz = new NeoVis.default(config);
+            viz.render();
+            console.log(viz);
+        }
+    </script>
+    <body onload="draw()">
+        <div id="viz"></div>
+        The initial CYPHER query is <b>{{ query }}</b>.
+    </body>
+</html>
