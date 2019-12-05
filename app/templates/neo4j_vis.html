@@ -17,6 +17,12 @@
     </head>
     <script>
         var input = '{{ query }}';
+        //console.log('tedste',input);
+        //var inputJSON = JSON.stringify(input);
+        var inputJSON = JSON.stringify(eval("(" + input + ")"));
+        console.log(inputJSON);
+        //var inputJSON = JSON.stringify(input);
+        alert(inputJSON.cypher);
         function draw() {
             var config = {
                 container_id: "viz",
@@ -24,7 +30,7 @@
                 server_user: "neo4j",
                 server_password: "neo1234",
                 //initial_cypher:"MATCH p=()-[]-() RETURN p",
-                initial_cypher: input,
+                //initial_cypher: input,
                 arrows: false,
                 hierarchical_layout: true,
                 hierarchical_sort_method:"hubsize",

@@ -18,6 +18,21 @@ def init_cypher(cypher):
         return render_template('neo4j_vis.html', query=cypher)
     except:
         return render_template('error.html')
+    
+@app.route("/config/<config>")
+def config_vis(config):
+    try:
+        return render_template('neo4j_vis.html', query=config)
+    except:
+        return render_template('error.html')
+    
+@app.route("/config2", methods=['GET'])
+def config_vis2():
+    query2 = request.args.get('config')
+    try:
+        return render_template('neo4j_vis.html', query=query2)
+    except:
+        return render_template('error.html')
         
 
 if __name__ == "__main__":
