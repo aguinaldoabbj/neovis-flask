@@ -16,66 +16,18 @@
         </script>
     </head>
     <script>
-        var input = JSON.stringify('{{ query }}');
-        document.write(typeof input);
-        //var obj = jQuery.parseJSON(decoded);
-        //var inputJSON = JSON.parse(decoded);
-        //console.log('tedste',input);
-        //var inputJSON = JSON.stringify(input);
-        //var inputJSON = JSON.stringify(eval("(" + input + ")"));
-        //console.log(decodeURI(input));
-        //document.write(encoded);
-        document.write(input);
-        //var inputJSON = JSON.stringify(input);
+        var input = '{{ query }}';
+        var config = JSON.parse(atob(input));
+        //document.write(JSON.stringify(config,null,'\t'));
+        console.dir(config);
         function draw() {
-            var config = {
-                container_id: "viz",
-                server_url: "bolt://10.7.40.134:7687",
-                server_user: "neo4j",
-                server_password: "neo1234",
-                //initial_cypher:"MATCH p=()-[]-() RETURN p",
-                //initial_cypher: input,
-                arrows: false,
-                hierarchical_layout: true,
-                hierarchical_sort_method:"hubsize",
-                labels: {
-                    "Aircraft": {
-                         "caption": "name",
-                    },
-                    "Station": {
-                         "caption": "code",
-                    }
-                },
-                relationships: {
-                    "Landing": {
-                        "caption": true,
-                        "thickness": "times"
-                    },
-                    "Approach": {
-                        "caption": true,
-                        "thickness": "times"
-                    },
-                    "Take off": {
-                        "caption": true,
-                        "thickness": "times"                    
-                    },
-                    "Climb": {
-                        "caption": true,
-                        "thickness": "times"                    
-                    },
-                    "Unknown": {
-                        "caption": true,
-                        "thickness": "times" 
-                    }
-                }
-            };
             var viz = new NeoVis.default(config);
             viz.render();
-            //console.log(viz);
+            console.log(viz);
         }
     </script>
     <body onload="draw()">
         <div id="viz"></div>
-        <!-- The initial CYPHER query is <b>{{ query }}</b>. -->
+        The CYPHER query is <b> <script> document.write(config.initial_cypher) </script> </b>.
     </body>
 </html>
