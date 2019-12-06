@@ -16,13 +16,17 @@
         </script>
     </head>
     <script>
-        var input = '{{ query }}';
+        var input = JSON.stringify('{{ query }}');
+        document.write(typeof input);
+        //var obj = jQuery.parseJSON(decoded);
+        //var inputJSON = JSON.parse(decoded);
         //console.log('tedste',input);
         //var inputJSON = JSON.stringify(input);
-        var inputJSON = JSON.stringify(eval("(" + input + ")"));
-        console.log(inputJSON);
+        //var inputJSON = JSON.stringify(eval("(" + input + ")"));
+        //console.log(decodeURI(input));
+        //document.write(encoded);
+        document.write(input);
         //var inputJSON = JSON.stringify(input);
-        alert(inputJSON.cypher);
         function draw() {
             var config = {
                 container_id: "viz",
@@ -67,11 +71,11 @@
             };
             var viz = new NeoVis.default(config);
             viz.render();
-            console.log(viz);
+            //console.log(viz);
         }
     </script>
     <body onload="draw()">
         <div id="viz"></div>
-        The initial CYPHER query is <b>{{ query }}</b>.
+        <!-- The initial CYPHER query is <b>{{ query }}</b>. -->
     </body>
 </html>

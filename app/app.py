@@ -1,4 +1,4 @@
-from flask import Flask,render_template
+from flask import Flask,render_template,request
 import socket
 
 app = Flask(__name__)
@@ -26,11 +26,11 @@ def config_vis(config):
     except:
         return render_template('error.html')
     
-@app.route("/config2", methods=['GET'])
-def config_vis2():
-    query2 = request.args.get('config')
+@app.route("/visconfig", methods=['GET'])
+def config_json():
+    query = request.args.get('json', type = str)
     try:
-        return render_template('neo4j_vis.html', query=query2)
+        return render_template('neo4j_vis.html', query=query)
     except:
         return render_template('error.html')
         
