@@ -21,12 +21,11 @@
 
     </style>
 
-    <script src="https://cdn.neo4jlabs.com/neovis.js/master/neovis.js"></script>
-
-    <script
-            src="https://code.jquery.com/jquery-3.2.1.min.js"
-            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-            crossorigin="anonymous"></script>
+    <script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+                integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+                crossorigin="anonymous">
+    </script>
 
     <script type="text/javascript">
         var viz;
