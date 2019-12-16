@@ -1,8 +1,8 @@
 #base image
 FROM python:3.7
 #copy app
-COPY . /app
-WORKDIR /app
+COPY app/ /neovis-flask-app
+WORKDIR /neovis-flask-app
 #install dependencies
 RUN pip install -r requirements.txt
 #clone neovis
