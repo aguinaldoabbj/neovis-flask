@@ -6,7 +6,7 @@ RUN pip install flask
 COPY neovis-flask-app /neovis-flask-app
 #go to app workdir
 WORKDIR /neovis-flask-app
-#clone neovis
+#clone neovis project
 RUN git clone https://github.com/aguinaldoabbj/neovis.js static/neovis.js
 #flask runs on 5000
 EXPOSE 5000
