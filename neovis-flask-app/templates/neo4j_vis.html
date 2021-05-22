@@ -29,24 +29,4 @@
         <div id="viz"></div>
         The CYPHER query is <b> <script> document.write(config.initial_cypher) </script> </b>.
     </body>
-    <script>
-        $('#reload').click(function () {
-    
-            var cypher = $('#cypher').val();
-    
-            if (cypher.length > 3) {
-                viz.renderWithCypher(cypher);
-            } else {
-                console.log('reload');
-                viz.reload();
-    
-            }
-    
-        });
-    
-        $('#stabilize').click(function () {
-            viz.stabilize();
-        });
-    
-    </script>
 </html>

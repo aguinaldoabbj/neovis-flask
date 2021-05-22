@@ -16,7 +16,7 @@ def index():
 @app.route("/form")
 def form():
     try:
-        return render_template('neo4j_vis_form.html')
+        return render_template('neovis.js-examples/form-example.html')
     except:
         return render_template('error.html')
            

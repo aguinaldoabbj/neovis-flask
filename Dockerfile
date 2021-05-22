@@ -1,6 +1,10 @@
 #base image
-FROM python:3.7
+#FROM python:3.7
+FROM python:slim
 #install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 RUN pip install flask
 #copy app
 COPY neovis-flask-app /neovis-flask-app
