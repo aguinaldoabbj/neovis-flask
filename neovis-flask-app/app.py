@@ -13,10 +13,24 @@ def index():
     except:
         return render_template('error.html')
     
-@app.route("/form")
-def form():
+@app.route("/examples/form")
+def form_ex():
     try:
         return render_template('neovis.js-examples/form-example.html')
+    except:
+        return render_template('error.html')
+
+@app.route("/examples/adv")
+def adv_ex():
+    try:
+        return render_template('neovis.js-examples/advanced-example.html')
+    except:
+        return render_template('error.html')
+
+@app.route("/adv")
+def adv():
+    try:
+        return render_template('advanced.html')
     except:
         return render_template('error.html')
            
