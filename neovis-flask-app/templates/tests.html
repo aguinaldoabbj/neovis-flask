@@ -17,7 +17,7 @@
     </style>
 
     <!-- FIXME: load from dist -->
-    <!--  <script type="text/javascript" src="../dist/neovis.js"></script> -->
+    <!-- <script type="text/javascript" src="../dist/neovis.js"></script> -->
 	<script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
 
 
@@ -31,23 +31,20 @@
 		// instantiate nodevis object
 		// draw
 
-		
+
 		var viz;
 
 		function draw() {
-			
 			var config = {
 				container_id: 'viz',
 				neo4j: {
 					server_url: 'bolt://localhost:7687',
-					server_user: '',
-					server_password: ''
+					server_user: 'neo4j',
+					server_password: 'gland-presentation-worry'
 				},
 				visConfig: {
 					nodes: {
-						shape: 'circle',
-						title: 'label'
-
+						shape: 'square'
 					},
 					edges: {
 						arrows: {
@@ -57,43 +54,32 @@
 				},
 				labels: {
 					Person: {
-						//label: 'name',
-						//color: 'red',
-						//group: 'community',
-						size: 'size',
+						label: 'pagerank',
+						group: 'community',
 						[NeoVis.NEOVIS_ADVANCED_CONFIG]: {
 							cypher: {
 								value: "MATCH (n) WHERE id(n) = $id RETURN n.size"
 							},
 							function: {
-								title: NeoVis.objectToTooltip
-										
+								title: NeoVis.objectToTitleHtml
 							},
-						},
-
-					}
-				},
-				relationships: {
-					ACTED_IN: {
-						value: 'weight',
-						[NeoVis.NEOVIS_ADVANCED_CONFIG]: {
-							function: {
-								title: NeoVis.objectToTooltip
-									//return viz.nodeToHtml(edge, undefined);
-									//return viz.titleToHtml(edge, undefined);
-									//return '<pre>test</pre>';//viz.nodeToHtml(edge, undefined);
-									//return viz.htmlTitle("Go wild <'span style='display: inline-block; animation: be-tacky 5s ease-in-out alternate infinite; margin: 5px;'>!<'/span>");
-							},
-							static: {
-								color: 'green',
-								//label: 'OI',
-								width: 3
-							}
 						}
 					}
 				},
-				initial_cypher: 'MATCH p=()-[]-() RETURN p LIMIT 50'
+				relationships: {
+					INTERACTS: {
+						value: 'weight',
+						[NeoVis.NEOVIS_ADVANCED_CONFIG]: {
+							function: {
+								title: NeoVis.objectToTitleHtml
+							},
+						}
+					}
+				},
+				initial_cypher: 'MATCH (n)-[r]->(m) RETURN n,r,m'
 			};
+			
+			//var config = input_json;
 
 			viz = new NeoVis.default(config);
 			viz.render();
@@ -105,19 +91,23 @@
 <body onload="draw()">
 <div id="viz"></div>
 
+Config JSON: <textarea rows="6" cols=50 id="input_json"></textarea><br>
 
 Cypher query: <textarea rows="4" cols=50 id="cypher"></textarea><br>
-<input type="submit" value="Submit" id="reload">
-<input type="submit" value="Stabilize" id="stabilize">
 
+<input type="submit" value="Submit" id="reload">
+
+<input type="submit" value="Stabilize" id="stabilize">
 
 </body>
 
 <script>
+
 	$('#reload').click(function () {
 
+		var input_json = JSON.parse($('#input_json').text());
 		var cypher = $('#cypher').val();
-
+		
 		if (cypher.length > 3) {
 			viz.renderWithCypher(cypher);
 		} else {

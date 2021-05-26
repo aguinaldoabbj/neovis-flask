@@ -13,24 +13,17 @@ def index():
     except:
         return render_template('error.html')
     
-@app.route("/examples/form")
-def form_ex():
+@app.route("/tests")
+def tests():
     try:
-        return render_template('neovis.js-examples/form-example.html')
+        return render_template('tests.html')
     except:
         return render_template('error.html')
 
-@app.route("/examples/adv")
-def adv_ex():
+@app.route("/form")
+def form():
     try:
-        return render_template('neovis.js-examples/advanced-example.html')
-    except:
-        return render_template('error.html')
-
-@app.route("/adv")
-def adv():
-    try:
-        return render_template('advanced.html')
+        return render_template('form.html')
     except:
         return render_template('error.html')
            
@@ -41,7 +34,7 @@ def config_json():
     encodedJSON = str(base64.b64encode(json.encode("utf-8")),"utf-8")
     print(encodedJSON)
     try:
-        return render_template('neo4j_vis.html', query=encodedJSON)
+        return render_template('vis.html', query=encodedJSON)
     except:
         return render_template('error.html')
         
