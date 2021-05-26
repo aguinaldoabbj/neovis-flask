@@ -26,6 +26,13 @@ def editor():
         return render_template('editor.html')
     except:
         return render_template('error.html')
+
+@app.route("/form")
+def form():
+    try:
+        return render_template('form.html')
+    except:
+        return render_template('error.html')
         
            
 @app.route("/visconfig", methods=['GET'])
