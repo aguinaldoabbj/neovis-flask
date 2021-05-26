@@ -20,13 +20,6 @@ def tests():
     except:
         return render_template('error.html')
 
-@app.route("/form")
-def form():
-    try:
-        return render_template('form.html')
-    except:
-        return render_template('error.html')
-
 @app.route("/editor")
 def editor():
     try:

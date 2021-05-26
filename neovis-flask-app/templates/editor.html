@@ -4,21 +4,32 @@
   <!-- when using the mode "code", it's important to specify charset utf-8 -->
   <meta charset="utf-8">
 
-  <title>JSONEditor | Switch mode</title>
+  <title>JSONEditor</title>
 
-  <!-- <link href="../dist/jsoneditor.css" rel="stylesheet" type="text/css">
-  <script src="../dist/jsoneditor.js"></script> -->
+<!-- jsoneditor CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor/dist/jsoneditor.min.css" 
+integrity="sha256-EWACe9YnZSAEWdwOUcfJpof61koTEeTBDQfUXl5grpE=" crossorigin="anonymous">
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.4.1/dist/jsoneditor.min.css" integrity="sha256-EWACe9YnZSAEWdwOUcfJpof61koTEeTBDQfUXl5grpE=" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.4.1/dist/jsoneditor.min.js" integrity="sha256-lwiC16Vocj5n/6HtA/BwF8KZGA7WMBSwwwiecrA7OAk=" crossorigin="anonymous"></script>
-    
+<!-- jsoneditor -->
+<script src="https://cdn.jsdelivr.net/npm/jsoneditor/dist/jsoneditor.min.js" 
+integrity="sha256-lwiC16Vocj5n/6HtA/BwF8KZGA7WMBSwwwiecrA7OAk=" crossorigin="anonymous">
+</script>
+
+<!-- jquery -->
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" 
+integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous">
+</script>
+
+<!-- neovis -->
+<script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
 
   <style type="text/css">
     body {
       font: 10.5pt arial;
-      color: #4d4d4d;
-      line-height: 150%;
-      width: 500px;
+      /* color: #4d4d4d; */
+      /* line-height: 150%; */
+      /* width: 95%; */
+      /* height: 95%; */
     }
 
     code {
@@ -26,22 +37,43 @@
     }
 
     #jsoneditor {
-      width: 500px;
-      height: 500px;
+      width: 50%;
+      height: 400px;
     }
+    #viz {
+      width: 100%;
+      height: 750px;
+      border: 1px solid lightgray;
+      font: 22pt arial;
+        margin: 10px;
+     }
+
   </style>
+
+<script type="text/javascript">
+  //get config and draw with neovis.js
+  var viz;
+
+  function draw(config) {
+
+    //console.dir(config);
+    viz = new NeoVis.default(config);
+    viz.render();
+    //console.log(viz);
+
+  }
+  </script>
+
 </head>
+
 <body>
 
-<p>
-  Switch editor mode using the mode box.
-  Note that the mode can be changed programmatically as well using the method
-  <code>editor.setMode(mode)</code>, try it in the console of your browser.
-</p>
+<h2> Config Editor Helper </h2>
 
 <div id="jsoneditor"></div>
 
 <script>
+  //
   const container = document.getElementById('jsoneditor')
 
   const options = {
@@ -55,19 +87,44 @@
     }
   }
 
-  const json = {
-    "array": [1, 2, 3],
-    "boolean": true,
-    "null": null,
-    "number": 123,
-    "object": {"a": "b", "c": "d"},
-    "string": "Hello World"
+  const initjson = {
+  "container_id": "viz",
+    "neo4j": {
+      "server_url": "bolt://localhost:7687",
+      "server_user": "",
+      "server_password": ""
+   },
+   "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
   }
 
-  const editor = new JSONEditor(container, options, json)
-  var json_out = json
-  console.log(json_out);
+  const editor = new JSONEditor(container, options, initjson)
+  //const updatedJson = editor.get()
+</script>
+
+<!-- Submit: <textarea rows="4" cols=50 id="cypher"></textarea><br> -->
+<input type="submit" value="Submit" id="reload">
+
+<h2> Graph Vizualization </h2>
+<div id="viz"></div>
+
+<input type="submit" value="Stabilize" id="stabilize">
+
+</body>
+
+<script>
+	$(document).ready(function () {
+		draw(initjson);
+	})
+
+	$("#reload").click(function () {
+    var updatedJson = editor.get();
+		draw(updatedJson);
+	})
+
+	$("#stabilize").click(function () {
+		viz.stabilize();
+	})
 
 </script>
-</body>
+
 </html>
