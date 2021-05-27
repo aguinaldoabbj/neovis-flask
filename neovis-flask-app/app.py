@@ -37,10 +37,14 @@ def form():
            
 @app.route("/visconfig", methods=['GET'])
 def config_json():
+    
     json = request.args.get('json', type = str)
-    print(json)
-    encodedJSON = str(base64.b64encode(json.encode("utf-8")),"utf-8")
-    print(encodedJSON)
+    
+    try:
+        encodedJSON = str(base64.b64encode(json.encode("utf-8")),"utf-8")
+    except AttributeError as error:
+        encodedJSON = {}
+
     try:
         return render_template('vis.html', query=encodedJSON)
     except:

@@ -3,10 +3,10 @@
         <title>Neo4j Visualization</title>
         <meta charset="UTF-8">
         <style type="text/css">
-          /*  #viz {
-                width: 900px;
-                height: 700px;
-            }*/
+           #viz {
+                width: 100%;
+                height: 750px;
+            }
         </style>
         <script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -15,18 +15,34 @@
         </script>
     </head>
     <script>
+        const initjson = {
+                "container_id": "viz",
+                    "neo4j": {
+                    "server_url": "bolt://localhost:7687",
+                    "server_user": "",
+                    "server_password": ""
+                     },
+                "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
+                }
         var input = '{{ query }}';
-        var config = JSON.parse(atob(input));
-        //document.write(JSON.stringify(config,null,'\t'));
-        console.dir(config);
+        console.log(input);
+
+        try {
+            var config = JSON.parse(atob(input));
+
+        } 
+        catch(err) {
+            var config = initjson
+        }
+        
+        
         function draw() {
             var viz = new NeoVis.default(config);
             viz.render();
-            console.log(viz);
         }
     </script>
     <body onload="draw()">
         <div id="viz"></div>
-        The CYPHER query is <b> <script> document.write(config.initial_cypher) </script> </b>.
+        <h2> CYPHER query is <b> <script> document.write(config.initial_cypher) </script> </b> </h2> 
     </body>
 </html>
