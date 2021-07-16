@@ -38,9 +38,9 @@
 			var config = {
 				container_id: 'viz',
 				neo4j: {
-					server_url: 'bolt://localhost:7687',
+					server_url: 'neo4j://localhost:7687',
 					server_user: 'neo4j',
-					server_password: 'gland-presentation-worry'
+					server_password: 'neo1234'
 				},
 				visConfig: {
 					nodes: {
@@ -54,7 +54,7 @@
 				},
 				labels: {
 					Person: {
-						label: 'pagerank',
+						label: 'name',
 						group: 'community',
 						[NeoVis.NEOVIS_ADVANCED_CONFIG]: {
 							cypher: {
@@ -62,6 +62,10 @@
 							},
 							function: {
 								title: NeoVis.objectToTitleHtml
+							},
+							static: {
+								color: 'red',
+								shape: 'circle'
 							},
 						}
 					}
@@ -80,7 +84,7 @@
 			};
 			
 			//var config = input_json;
-
+			console.log(config);
 			viz = new NeoVis.default(config);
 			viz.render();
 			console.log(viz);

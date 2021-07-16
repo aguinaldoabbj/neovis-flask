@@ -11,8 +11,8 @@
         <script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"
                 integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-                crossorigin="anonymous">
-        </script>
+                crossorigin="anonymous"></script>
+
     </head>
     <script>
         const initjson = {
@@ -24,6 +24,7 @@
                      },
                 "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
                 }
+                
         var input = '{{ query }}';
         console.log(input);
 
@@ -34,9 +35,27 @@
         catch(err) {
             var config = initjson
         }
-        
+
+        function parse_dynamic_obj(obj, final_obj) {
+            for (const [key, value] of Object.entries(obj)) {
+                try {
+                    k = key.replace(/[\[\]']+/g,'');
+                    k = eval(k);
+                } catch (e) { }
+
+                if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+                    final_obj[k] = {}
+                    parse_dynamic_obj(value, final_obj[k]);
+                } else {
+                    final_obj[k] = value;
+                 }
+            }
+            return final_obj;
+        }
+
         function draw() {
-            var viz = new NeoVis.default(config);
+            var conf = parse_dynamic_obj(config, {}); 
+            var viz = new NeoVis.default(conf);
             viz.render();
         }
     </script>

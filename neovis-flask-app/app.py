@@ -27,6 +27,7 @@ def editor():
     except:
         return render_template('error.html')
 
+
 @app.route("/form")
 def form():
     try:
