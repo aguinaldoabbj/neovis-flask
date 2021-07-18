@@ -34,6 +34,13 @@ def form():
         return render_template('form.html')
     except:
         return render_template('error.html')
+
+@app.route("/form-gui")
+def form_gui():
+    try:
+        return render_template('form-gui.html')
+    except:
+        return render_template('error.html')
         
            
 @app.route("/visconfig", methods=['GET'])

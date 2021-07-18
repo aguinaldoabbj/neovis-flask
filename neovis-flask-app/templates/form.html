@@ -1,10 +1,8 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- when using the mode "code", it's important to specify charset utf-8 -->
-  <meta charset="utf-8">
-
-  <title>Neo4j Visualization - Config</title>
+<title>Graph Editor - Canvas</title>
+<meta charset="utf-8">
 
 <!-- jsoneditor CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.5.1/dist/jsoneditor.min.css" 
@@ -23,109 +21,129 @@ integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="ano
 <!-- neovis -->
 <script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
 
-  <style type="text/css">
-    body {
-      font: 10.5pt arial;
-      /* color: #4d4d4d; */
-      /* line-height: 150%; */
-      /* width: 95%; */
-      /* height: 95%; */
-    }
 
-    code {
-      background-color: #f5f5f5;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    #jsoneditor {
-      width: 80%;
-      height: 400px;
-    }
-    #viz {
-      width: 100%;
-      height: 750px;
-      border: 1px solid lightgray;
-      font: 22pt arial;
-        margin: 10px;
-     }
+body {
+  margin: 0;
+}
 
-  </style>
+/* Style the header */
+.header {
+  background-color: #f1f1f1;
+  padding: 15px;
+  text-align: center;
+}
 
-<script type="text/javascript">
-  //get config and draw with neovis.js
-  var viz;
+#row {
+  display:table;
+  text-align: center;
+  vertical-align: middle;
+  width:100%;
+  height:100%;
+  box-sizing: border-box;
+  position: relative
+}
 
-  function draw(config) {
+#editor {
+  float: left;
+  text-align: right;
+  width: 30%;
+  height: 800px;
+  padding: 15px;
+}
 
-    //console.dir(config);
-    viz = new NeoVis.default(config);
-    viz.render();
-    //console.log(viz);
+#viz {
+  float: right;
+  text-align: center;
+  width: 70%;
+  height: 900px;
+  padding: 15px;
+}
 
-  }
+</style>
 
-  function parse_dynamic_obj(obj, final_obj) {
-    for (const [key, value] of Object.entries(obj)) {
-        try {
-            k = key.replace(/[\[\]']+/g,'');
-            k = eval(k);
-        } catch (e) { }
-
-        if (value && typeof value === 'object' && Object.keys(value).length > 0) {
-            final_obj[k] = {}
-            parse_dynamic_obj(value, final_obj[k]);
-        } else {
-            final_obj[k] = value;
+    <script type="text/javascript">
+        //get config and draw with neovis.js
+        var viz;
+    
+        function draw(config) {
+    
+        //console.dir(config);
+        viz = new NeoVis.default(config);
+        viz.render();
+        //console.log(viz);
+    
         }
-    }
-    return final_obj;
-  }
-
-  </script>
+    
+        function parse_dynamic_obj(obj, final_obj) {
+        for (const [key, value] of Object.entries(obj)) {
+            try {
+                k = key.replace(/[\[\]']+/g,'');
+                k = eval(k);
+            } catch (e) { }
+    
+            if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+                final_obj[k] = {}
+                parse_dynamic_obj(value, final_obj[k]);
+            } else {
+                final_obj[k] = value;
+            }
+        }
+        return final_obj;
+        }
+    
+    </script>
 
 </head>
-
 <body>
 
-<h2> Config Editor Helper </h2>
+<div class="header">
+  <h1>Graph Canvas</h1>
+  <input type="submit" value="Stabilize" id="stabilize">
+</div>
 
-<div id="jsoneditor"></div>
+<div class="row">
+  <div id="editor">
+    <h2 style="text-align:left;">Config Editor</h2>
+    <input type="submit" value="Draw" id="reload">
+  </div>
+  
+  <div id="viz"></div>
+</div>
 
 <script>
-  //
-  const container = document.getElementById('jsoneditor')
-
-  const options = {
-    mode: 'tree',
-    modes: ['code', 'form', 'text', 'tree', 'view', 'preview'], // allowed modes
-    onError: function (err) {
-      alert(err.toString())
-    },
-    onModeChange: function (newMode, oldMode) {
-      console.log('Mode switched from', oldMode, 'to', newMode)
+    //
+    const container = document.getElementById('editor')
+  
+    const options = {
+      mode: 'tree',
+      modes: ['code', 'form', 'text', 'tree', 'view', 'preview'], // allowed modes
+      onError: function (err) {
+        alert(err.toString())
+      },
+      onModeChange: function (newMode, oldMode) {
+        console.log('Mode switched from', oldMode, 'to', newMode)
+      }
     }
-  }
+  
+    const initconf = {
+    "container_id": "viz",
+      "neo4j": {
+        "server_url": "neo4j://localhost:7687",
+        "server_user": "neo4j",
+        "server_password": "neo1234"
+     },
+     "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
+    }
+  
+    const editor = new JSONEditor(container, options, initconf)
+    //const updatedJson = editor.get()
+  </script>
 
-  const initconf = {
-  "container_id": "viz",
-    "neo4j": {
-      "server_url": "neo4j://localhost:7687",
-      "server_user": "neo4j",
-      "server_password": "neo1234"
-   },
-   "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
-  }
-
-  const editor = new JSONEditor(container, options, initconf)
-  //const updatedJson = editor.get()
-</script>
-
-<!-- Submit: <textarea rows="4" cols=50 id="cypher"></textarea><br> -->
-<input type="submit" value="Submit" id="reload">
-
-<h2> Graph Vizualization </h2>
-<div id="viz"></div>
-
-<input type="submit" value="Stabilize" id="stabilize">
 
 </body>
 

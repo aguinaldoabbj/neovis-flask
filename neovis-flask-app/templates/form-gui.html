@@ -1,0 +1,213 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <!-- when using the mode "code", it's important to specify charset utf-8 -->
+  <meta charset="utf-8">
+
+  <title>Neo4j Visualization - Config</title>
+
+<!-- jsoneditor CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.5.1/dist/jsoneditor.min.css" 
+integrity="sha256-ZiETervnaX4jwTNsaupilMUe3oWuVwn1g3nQYO/8aAU=" crossorigin="anonymous">
+
+<!-- jsoneditor -->
+<script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.5.1/dist/jsoneditor.min.js" 
+integrity="sha256-9tv51T541jtZpCqXhOj30kJqKPohDUb5sWC/pDOWhdw=" crossorigin="anonymous">
+</script>
+
+<!-- object-gui CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/object-gui@1.1.1/dist/css/object-gui.css" integrity="sha256-nqIm88Hg6rXJsSV7HJv8Xm5sqrWp5/+QmaUZ2dCuZqc=" crossorigin="anonymous">
+
+<!-- object-gui -->
+<script src="https://cdn.jsdelivr.net/npm/object-gui@1.1.1/dist/js/object-gui.js" integrity="sha256-RIQPALuSNdByU1pec4DAMhhVtVv7LUjpc3M1p4dIR64=" crossorigin="anonymous">
+</script>
+
+<!-- jquery -->
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" 
+integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous">
+</script>
+
+<!-- neovis -->
+<script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
+
+  <style type="text/css">
+    body {
+      font: 10.5pt arial;
+      /* color: #4d4d4d; */
+      /* line-height: 150%; */
+      /* width: 95%; */
+      /* height: 95%; */
+    }
+
+    code {
+      background-color: #f5f5f5;
+    }
+
+    #object-gui {
+      width: 80%;
+      height: 400px;
+    }
+
+    #viz {
+      width: 100%;
+      height: 750px;
+      border: 1px solid lightgray;
+      font: 22pt arial;
+        margin: 10px;
+    }
+
+  </style>
+
+<script type="text/javascript">
+  //get config and draw with neovis.js
+  var viz;
+
+  function draw(config) {
+
+    //console.dir(config);
+    viz = new NeoVis.default(config);
+    viz.render();
+    //console.log(viz);
+
+  }
+
+  function parse_dynamic_obj(obj, final_obj) {
+    for (const [key, value] of Object.entries(obj)) {
+        try {
+            k = key.replace(/[\[\]']+/g,'');
+            k = eval(k);
+        } catch (e) { }
+
+        if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+            final_obj[k] = {}
+            parse_dynamic_obj(value, final_obj[k]);
+        } else {
+            final_obj[k] = value;
+        }
+    }
+    return final_obj;
+  }
+
+  </script>
+
+</head>
+
+<body>
+
+<h2> Config Editor Helper </h2>
+
+<div id="object-gui"></div>
+
+<script>
+  //
+  const code = document.getElementById("object-gui");
+
+  const initconf = {
+    "container_id": "viz",
+      "neo4j": {
+        "server_url": "neo4j://localhost:7687",
+        "server_user": "neo4j",
+        "server_password": "neo1234"
+    },
+    "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
+  }
+
+  const data = {
+      prop1: "pluto",
+      prop2: 3,
+      group1: {
+        prop1: "paperino",
+        prop2: 0.3,
+      },
+      color1: "#ff0000",
+      select1: "Item 2",
+      alert: function () {
+        alert(JSON.stringify(data, null, 4));
+      },
+    };
+
+  const editor = new Editor("sample", "Sample", initconf);
+
+  editor.top().right();
+  editor.theme("light");
+
+  const group1 = editor.root.addGroup("group1", "Group 1", true);
+
+  group1.addProperty("prop1", "Property 1", "string").change(() => {
+    console.log(data);
+  });
+
+  group1
+    .addProperty("prop2", "Property 2", "number")
+    .min(0)
+    .max(1)
+    .step(0.01)
+    .change(() => {
+      console.log(data);
+    });
+
+  editor.root.addProperty("prop1", "Property 1", "string").change(() => {
+    console.log(data);
+  });
+
+  editor.root
+    .addProperty("prop2", "Property 2", "number")
+    .min(0)
+    .max(10)
+    .step(0.5)
+    .change(() => {
+      console.log(data);
+    });
+
+  editor.root.addProperty("color1", "Color 1", "color").change(() => {
+    console.log(data);
+  });
+
+  const select1Input = editor.root.addProperty("select1", "Select 1", "select").change(() => {
+    code.innerText = JSON.stringify(initconf, null, 4);
+
+    console.log(data);
+  });
+
+  select1Input.addItem("Item 1");
+  select1Input.addItem("Item 2");
+  select1Input.addItem("Item 3");
+
+  editor.root.addButton("alert", "Alert");
+
+  code.innerText = JSON.stringify(initconf, null, 4);
+
+  //const updatedJson = editor.get()
+</script>
+
+<!-- Submit: <textarea rows="4" cols=50 id="cypher"></textarea><br> -->
+<input type="submit" value="Submit" id="reload">
+
+<h2> Graph Vizualization </h2>
+<div id="viz"></div>
+
+<input type="submit" value="Stabilize" id="stabilize">
+
+</body>
+
+<script>
+	$(document).ready(function () {
+    //console.log(initconf);
+		draw(initconf);
+	})
+
+	$("#reload").click(function () {
+    var updatedJson = editor.get();
+    var conf = parse_dynamic_obj(updatedJson, {});
+    //console.log(updatedJson);
+    //console.log(conf);
+		draw(conf);
+	})
+
+	$("#stabilize").click(function () {
+		viz.stabilize();
+	})
+
+</script>
+
+</html>
