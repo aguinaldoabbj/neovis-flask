@@ -36,25 +36,32 @@
             var config = initjson
         }
 
-        function parse_dynamic_obj(obj, final_obj) {
-            for (const [key, value] of Object.entries(obj)) {
-                try {
-                    k = key.replace(/[\[\]']+/g,'');
-                    k = eval(k);
-                } catch (e) { }
+        function parse_json2obj(obj, final_obj) {
+                for (const [key, value] of Object.entries(obj)) {
+                    try {
+                        var k = key.replace(/[\[\]']+/g, '');
+                        k = eval(k);
+                    } catch (e) { }
 
-                if (value && typeof value === 'object' && Object.keys(value).length > 0) {
-                    final_obj[k] = {}
-                    parse_dynamic_obj(value, final_obj[k]);
-                } else {
-                    final_obj[k] = value;
-                 }
+                    try {
+                        var v = "";
+                        v = eval(value);
+                    } catch (e) { }
+
+                    if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+                        final_obj[k] = {}
+                        parse_json2obj(value, final_obj[k]);
+                    } else if (v && typeof v === 'function') {
+                        final_obj[k] = v;
+                    } else {
+                        final_obj[k] = value;
+                    }
+                }
+                return final_obj;
             }
-            return final_obj;
-        }
 
         function draw() {
-            var conf = parse_dynamic_obj(config, {}); 
+            var conf = parse_json2obj(config, {}); 
             var viz = new NeoVis.default(conf);
             viz.render();
         }

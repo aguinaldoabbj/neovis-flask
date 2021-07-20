@@ -78,24 +78,60 @@ body {
         //console.log(viz);
     
         }
-    
-        function parse_dynamic_obj(obj, final_obj) {
-        for (const [key, value] of Object.entries(obj)) {
-            try {
-                k = key.replace(/[\[\]']+/g,'');
+
+        function parse_json2obj(obj, final_obj) {
+            for (const [key, value] of Object.entries(obj)) {
+              try {
+                var k = key.replace(/[\[\]']+/g, '');
                 k = eval(k);
-            } catch (e) { }
-    
-            if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+              } catch (e) { }
+
+              try {
+                var v = "";
+                v = eval(value);
+              } catch (e) { }
+
+              if (value && typeof value === 'object' && Object.keys(value).length > 0) {
                 final_obj[k] = {}
-                parse_dynamic_obj(value, final_obj[k]);
-            } else {
+                parse_json2obj(value, final_obj[k]);
+              } else if (v && typeof v === 'function') {
+                final_obj[k] = v;
+              } else {
                 final_obj[k] = value;
+                }
             }
-        }
-        return final_obj;
+            return final_obj;
         }
     
+        // function parse_dynamic_obj(obj, final_obj) {
+        //   for (const [key, value] of Object.entries(obj)) {
+        //     //console.log(key);
+        //     //console.log(value);
+        //     try {
+        //         k = key.replace(/[\[\]']+/g,'');
+        //         k = eval(k);
+        //     } catch (err) { }
+
+        //     try {
+        //       v = value.replace(/[\[\]']+/g, '');
+        //       v = eval(v);
+        //     } catch (err) { }
+
+        //     if (v && typeof v === 'object' && Object.keys(v).length > 0) {
+        //       final_obj[k] = {};
+        //       parse_dynamic_obj(v, final_obj[k]);
+        //     } else {
+        //         final_obj[k] = v;
+        //       }
+        //     //console.log(k,typeof(k));
+        //     //console.log(value,typeof(value));
+        //     //console.log(typeof(value));
+        //     //console.log(k);
+        //     //console.log(value);
+        //   }
+        //   return final_obj;
+        // }
+
     </script>
 
 </head>
@@ -120,7 +156,7 @@ body {
     const container = document.getElementById('editor')
   
     const options = {
-      mode: 'tree',
+      mode: 'code',
       modes: ['code', 'form', 'text', 'tree', 'view', 'preview'], // allowed modes
       onError: function (err) {
         alert(err.toString())
@@ -155,9 +191,7 @@ body {
 
 	$("#reload").click(function () {
     var updatedJson = editor.get();
-    var conf = parse_dynamic_obj(updatedJson, {});
-    //console.log(updatedJson);
-    //console.log(conf);
+    var conf = parse_json2obj(updatedJson, {});
 		draw(conf);
 	})
 
