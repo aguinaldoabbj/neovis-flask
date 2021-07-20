@@ -83,7 +83,8 @@ body {
             for (const [key, value] of Object.entries(obj)) {
               try {
                 var k = key.replace(/[\[\]']+/g, '');
-                k = eval(k);
+                // 'Node' is a native JS code func
+                if (k != 'Node') { k = eval(k); }
               } catch (e) { }
 
               try {
