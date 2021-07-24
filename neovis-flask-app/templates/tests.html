@@ -1,128 +1,44 @@
-<!doctype html>
-<html>
-<head>
-    <title>Neovis.js Simple Example</title>
-    <style type="text/css">
-        html, body {
-            font: 16pt arial;
-        }
+<!DOCTYPE html>
 
-        #viz {
-            width: 900px;
-            height: 700px;
-            border: 1px solid lightgray;
-            font: 22pt arial;
-        }
+<style>
+    #slider {
+        width: 250px;
+        margin: 100px auto;
+    }
 
-    </style>
+</style>
 
-    <!-- FIXME: load from dist -->
-    <!-- <script type="text/javascript" src="../dist/neovis.js"></script> -->
-	<script src="{{url_for('static', filename='neovis.js/dist/neovis.js')}}"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.2.0/dist/nouislider.css"
+    integrity="sha256-pxE3J1L9HNIpWOwG2a7NCLQGVfusHcaHLDkbQax9sbY=" crossorigin="anonymous">
 
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.2.0/dist/nouislider.js"
+    integrity="sha256-eMWSeWmsqGaIrzKYPqU2SmbxCRD0CjxxFIO/QBatiIg=" crossorigin="anonymous">
+</script>
 
-    <script
-            src="https://code.jquery.com/jquery-3.2.1.min.js"
-            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-            crossorigin="anonymous"></script>
-
-    <script type="text/javascript">
-		// define config car
-		// instantiate nodevis object
-		// draw
-
-
-		var viz;
-
-		function draw() {
-			var config = {
-				container_id: 'viz',
-				neo4j: {
-					server_url: 'neo4j://localhost:7687',
-					server_user: 'neo4j',
-					server_password: 'neo1234'
-				},
-				visConfig: {
-					nodes: {
-						shape: 'square'
-					},
-					edges: {
-						arrows: {
-							to: {enabled: true}
-						}
-					},
-				},
-				labels: {
-					Person: {
-						label: 'name',
-						group: 'community',
-						[NeoVis.NEOVIS_ADVANCED_CONFIG]: {
-							cypher: {
-								value: "MATCH (n) WHERE id(n) = $id RETURN n.size"
-							},
-							function: {
-								title: NeoVis.objectToTitleHtml
-							},
-							static: {
-								color: 'red',
-								shape: 'circle'
-							},
-						}
-					}
-				},
-				relationships: {
-					INTERACTS: {
-						value: 'weight',
-						[NeoVis.NEOVIS_ADVANCED_CONFIG]: {
-							function: {
-								title: NeoVis.objectToTitleHtml
-							},
-						}
-					}
-				},
-				initial_cypher: 'MATCH (n)-[r]->(m) RETURN n,r,m'
-			};
-			
-			//var config = input_json;
-			console.log(config);
-			viz = new NeoVis.default(config);
-			viz.render();
-			console.log(viz);
-
-		}
-    </script>
-</head>
-<body onload="draw()">
-<div id="viz"></div>
-
-Cypher query: <textarea rows="4" cols=50 id="cypher"></textarea><br>
-
-<input type="submit" value="Submit" id="reload">
-
-<input type="submit" value="Stabilize" id="stabilize">
-
-</body>
+<script src="https://cdn.jsdelivr.net/npm/wnumb@1.2.0/wNumb.min.js"
+    integrity="sha256-DkHIFUKQfqQ7jA6GnWR9ZyB4Jb+j+dOuY12vnYq8xjk=" crossorigin="anonymous"></script>
 
 <script>
 
-	$('#reload').click(function () {
+    var stepsSlider = document.getElementById('slider');
 
-		var input_json = JSON.parse($('#input_json').text());
-		var cypher = $('#cypher').val();
-		
-		if (cypher.length > 3) {
-			viz.renderWithCypher(cypher);
-		} else {
-			console.log('reload');
-			viz.reload();
+    noUiSlider.create(stepsSlider, {
+        start: [0, 1],
+        connect: true,
+        tooltips: [wNumb({ decimals: 0 }), wNumb({ decimals: 0 })],
+        range: {
+            'min': [0],
+            //'10%': [10, 10],
+            //'50%': [80, 50],
+            //'80%': 150,
+            'max': [5]
+        }
+    });
 
-		}
-
-	});
-
-	$('#stabilize').click(function () {
-		viz.stabilize();
-	});
+    stepsSlider.noUiSlider.on('update', function (values, handle) {
+        //inputs[handle].value = values[handle];
+        console.log(values);
+        console.log(Math.trunc(values[0]));
+    });
 
 </script>
-</html>

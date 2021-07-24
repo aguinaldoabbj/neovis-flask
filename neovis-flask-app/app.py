@@ -28,10 +28,12 @@ def editor():
         return render_template('error.html')
 
 
-@app.route("/form")
+@app.route("/form", methods=['GET'])
 def form():
+    nslots = request.args.get('nslots', type = int)
+    #print(nslots)
     try:
-        return render_template('form.html')
+        return render_template('form.html', query=nslots)
     except:
         return render_template('error.html')
 
