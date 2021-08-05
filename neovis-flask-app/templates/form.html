@@ -33,7 +33,10 @@ integrity="sha256-9tv51T541jtZpCqXhOj30kJqKPohDUb5sWC/pDOWhdw=" crossorigin="ano
 <script src="https://cdn.jsdelivr.net/npm/wnumb@1.2.0/wNumb.min.js"
   integrity="sha256-DkHIFUKQfqQ7jA6GnWR9ZyB4Jb+j+dOuY12vnYq8xjk=" crossorigin="anonymous"></script>
 
-
+<!-- Vis JS   -->
+<script src="https://cdn.jsdelivr.net/npm/vis-network@9.0.5/dist/vis-network.js"
+  integrity="sha256-urdToxLPXuYm080ktiq7N5La34Myng2dMmqPUGHJF9w=" crossorigin="anonymous">
+</script>
 
 <style>
 * {
@@ -72,28 +75,198 @@ body {
 #viz {
   float: right;
   text-align: center;
-  width: 70%;
+  width: 67%;
   height: 900px;
   padding: 15px;
 }
 
 #slider {
-    width: 250px;
+    width: 300px;
     margin: 100px auto;
 }
 
+#legend {
+  float: left;
+  text-align: center;
+  width: 3%;
+  height: 900px;
+  /* height: 800px; */
+  /* padding: 15px; */
+}
+
 </style>
+
+    <script type="text/javascript">
+      var nodes = null;
+      var edges = null;
+      var network = null;
+
+      var LENGTH_MAIN = 350,
+        LENGTH_SERVER = 150,
+        LENGTH_SUB = 50,
+        WIDTH_SCALE = 2,
+        GREEN = "green",
+        RED = "#C5000B",
+        ORANGE = "orange",
+        //GRAY = '#666666',
+        GRAY = "gray",
+        BLACK = "#2B1B17";
+
+      // Called when the Visualization API is loaded.
+      function draw_legend() {
+        // Create a data table with nodes.
+        nodes = [];
+
+        // Create a data table with links.
+        edges = [];
+
+        // legend
+        var mylegend = document.getElementById("slider");
+        //var x = -mylegend.clientWidth / 2 + 50;
+        //var y = -mylegend.clientHeight / 2 + 50;
+        var x = -mylegend.clientWidth / 3 + 80;
+        //var y = -mylegend.clientHeight / 2;
+        var y = -100;
+        var step = 75;
+        nodes.push({
+          id: 1000,
+          x: x,
+          y: y,
+          label: "Unity",
+          group: "Unity",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+        nodes.push({
+          id: 1001,
+          x: x,
+          y: y + step,
+          label: "Area",
+          group: "Area",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+        nodes.push({
+          id: 1002,
+          x: x,
+          y: y + 2 * step,
+          label: "Sub Area",
+          group: "Sub_Area",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+        nodes.push({
+          id: 1003,
+          x: x,
+          y: y + 3 * step,
+          label: "Node",
+          group: "Node",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+        nodes.push({
+          id: 1004,
+          x: x,
+          y: y + 4 * step,
+          label: "Module",
+          group: "Module",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+
+        nodes.push({
+          id: 1005,
+          x: x,
+          y: y + 5 * step,
+          label: "Episode",
+          group: "Episode",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+        nodes.push({
+          id: 1006,
+          x: x,
+          y: y + 6 * step,
+          label: " Occur ",
+          group: "Occurrence",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+
+        // create a network
+        var container = document.getElementById("legend");
+        var data = {
+          nodes: nodes,
+          edges: edges,
+        };
+        var options = {
+          nodes: {
+            scaling: {
+              min: 16,
+              max: 32,
+            },
+          },
+          edges: {
+            color: GRAY,
+            smooth: false,
+          },
+          physics: {
+            barnesHut: { gravitationalConstant: -30000 },
+            stabilization: { iterations: 2500 },
+          },
+          groups: {
+            Unity: {
+              shape: "triangleDown",
+              color: "black",
+            },
+            Area: {
+              shape: "square",
+              color: "darkblue", // blue
+            },
+            Sub_Area: {
+              shape: "diamond",
+              color: "purple", // purple
+            },
+            Node: {
+              shape: "hexagon",
+              color: "orange", // red
+            },
+            Module: {
+              shape: "triangle",
+              color: "red", 
+            },
+            Episode: {
+              shape: "dot",
+              color: { border: "black", background: "white"},
+            },
+            Occurrence: {
+              shape: "database",
+              color: { border: "black", background: "white" },
+            },            
+          },
+        };
+        legend = new vis.Network(container, data, options);
+      }
+    </script>
 
     <script type="text/javascript">
         //get config and draw with neovis.js
         var viz;
     
         function draw(config) {
-    
-        //console.dir(config);
-        viz = new NeoVis.default(config);
-        viz.render();
-        //console.log(viz);
+
+          //console.dir(config);
+          viz = new NeoVis.default(config);
+          viz.render();
+          //console.log(viz);
+          //console.log(viz.nodes.get()[0].raw['properties']);
     
         }
 
@@ -124,11 +297,17 @@ body {
         }
         
         //insert a string in plase of a marker
-        function insert_string(cypher_str) {
-          var args = [].slice.call(arguments, 1), i = 0;
+        // function insert_string(cypher_str) {
+        //   var args = [].slice.call(arguments, 1), i = 0;
 
-          return cypher_str.replace(/%s/g, () => args[i++]);
-        }
+        //   console.log(args);
+
+        //   cypher_str = cypher_str.replace(/%s/g, () => args[i++]);
+        //   cypher_str = cypher_str.replace(/%t/g, () => args[i++]);
+
+        //   //return cypher_str.replace(/%s/g, () => args[i++]);
+        //   return cypher_str;
+        // }
     
     </script>
 
@@ -145,11 +324,12 @@ body {
     <h2 style="text-align:left;">Config Editor</h2>
     <input type="submit" value="Draw" id="reload">
   </div>
-  
+  <div id="legend"></div>
   <div id="viz"></div>
 </div>
 
 <div id="slider"></div>
+<!-- <div id="legend"></div> -->
 
 <script>
     //JSON editor
@@ -170,9 +350,9 @@ body {
     const initconf = {
     "container_id": "viz",
       "neo4j": {
-        "server_url": "neo4j://localhost:7687",
-        "server_user": "neo4j",
-        "server_password": "neo1234"
+        "server_url": "neo4j://10.42.0.131:7687",
+        "server_user": "",
+        "server_password": ""
      },
      "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
     }
@@ -186,7 +366,7 @@ body {
 
 <script>
 	$(document).ready(function () {
-
+    draw_legend();
     draw(initconf);
 	})
 
@@ -195,9 +375,13 @@ body {
     var conf = parse_json2obj(updatedJson, {});
 
     //adding time slot filter to the cypher query
-    conf.initial_cypher = insert_string(conf.initial_cypher.toString(), slot_filter);
+    //conf.initial_cypher = insert_string(conf.initial_cypher.toString(), slot_filter);
+    //conf.initial_cypher = insert_string(conf.initial_cypher.toString(), slot_select);
+    conf.initial_cypher = conf.initial_cypher.replace(/%s/g,slot_filter);
+    conf.initial_cypher = conf.initial_cypher.replace(/%t/g,slot_select);
     console.log(conf.initial_cypher);
     //conf = parse('hello %s, how are you doing', my_name);
+    draw_legend();
 		draw(conf);
 	})
 
@@ -208,28 +392,86 @@ body {
 </script>
 
 <script>
-  //interval slider to filter time slots
-  var stepsSlider = document.getElementById('slider');
-  var nslots = '{{ query }}';
+  
+  let nslots;
+  //create range slider only when it's possible to get the viz object
+  
+  var checkExist = setInterval(function () {
+    if ($('#viz').length) {
+      
+      nslots = viz.nodes.get()[0].raw['properties']['total_slots'];
+      nslots = parseInt(nslots);
+      
+      let stepsSlider = document.getElementById('slider');
+      
+      noUiSlider.create(stepsSlider, {
+        start: [0, 1],
+        connect: true,
+        tooltips: [wNumb({ decimals: 0 }), wNumb({ decimals: 0 })],
+        range: {
+          'min': [0],
+          //'10%': [10, 10],
+          //'50%': [80, 50],
+          //'80%': 150,
+          'max': nslots - 1,
+        },
+        //connect: true,
+        //margin: 300,
+        step: 1,
+        pips: {
+          mode: 'steps',
+          stepped: true,
+          density: 1
+        }
+      });
 
-  noUiSlider.create(stepsSlider, {
-    start: [0, 1],
-    connect: true,
-    tooltips: [wNumb({ decimals: 0 }), wNumb({ decimals: 0 })],
-    range: {
-      'min': [0],
-      //'10%': [10, 10],
-      //'50%': [80, 50],
-      //'80%': 150,
-      'max': nslots-1
-    },
-    step: 1,
-    pips: {
-      mode: 'steps',
-      stepped: true,
-      density: 1
+      stepsSlider.noUiSlider.on('update', function (values, handle) {
+
+        slider_range = [Math.trunc(values[0]), Math.trunc(values[1])];
+        //getting values from slider (adding 1 to make inclusive in neo4j)
+        values = [Math.trunc(values[0]), Math.trunc(values[1]) + 1];
+
+        //defining filter for time slots in for a cypher query
+        slot_filter = "WHERE split(n.activations_train, '')" + "[" + values[0] + ".." + values[1] + "] = "
+          + JSON.stringify(interval_getter(values));
+
+        slot_select = "WHERE n.time_slot in range(" + slider_range[0] + "," +
+          slider_range[1] + ")" + " AND o.time_slot in range(" + slider_range[0] + "," +
+          slider_range[1] + ")";
+
+        //stri1 + '[' + values[0] + '..' + values[1] + ']' + JSON.stringify(train).replace(/\\/g, '');
+
+      });
+
+      clearInterval(checkExist);
     }
-  });
+  }, 50); // check every 100ms
+  
+  
+
+  //console.log(nslots);
+  //interval slider to filter time slots
+  //var stepsSlider = document.getElementById('slider');
+  //var nslots = '{{ query }}';
+  
+  // noUiSlider.create(stepsSlider, {
+  //   start: [0, 1],
+  //   connect: true,
+  //   tooltips: [wNumb({ decimals: 0 }), wNumb({ decimals: 0 })],
+  //   range: {
+  //     'min': [0],
+  //     //'10%': [10, 10],
+  //     //'50%': [80, 50],
+  //     //'80%': 150,
+  //     'max': nslots-1,
+  //   },
+  //   step: 1,
+  //   pips: {
+  //     mode: 'steps',
+  //     stepped: true,
+  //     density: 1
+  //   }
+  // });
 
   function interval_getter(range){
 
@@ -237,18 +479,27 @@ body {
     return train;
   }
 
-  stepsSlider.noUiSlider.on('update', function (values, handle) {
+  //let slider_range = 0;
+  //let slot_filter = "";
+  //let slot_select = "";
+  
+  // stepsSlider.noUiSlider.on('update', function (values, handle) {
 
-    //getting values from slider (adding 1 to make inclusive)
-    values = [Math.trunc(values[0]), Math.trunc(values[1])+1];
-    
-    //defining filter for time slots
-    slot_filter = "WHERE split(n.activations_train, '')"+"[" + values[0] + ".." + values[1] + "] = "
-    + JSON.stringify(interval_getter(values));
+  //   slider_range = [Math.trunc(values[0]), Math.trunc(values[1])];
+  //   //getting values from slider (adding 1 to make inclusive in neo4j)
+  //   values = [Math.trunc(values[0]), Math.trunc(values[1])+1];
+        
+  //   //defining filter for time slots in for a cypher query
+  //   slot_filter = "WHERE split(n.activations_train, '')"+"[" + values[0] + ".." + values[1] + "] = "
+  //   + JSON.stringify(interval_getter(values));
 
-  //stri1 + '[' + values[0] + '..' + values[1] + ']' + JSON.stringify(train).replace(/\\/g, '');
+  //   slot_select = "WHERE n.time_slot in range(" + slider_range[0] + "," +
+  //     slider_range[1] + ")" + " AND o.time_slot in range("+ slider_range[0] + "," +
+  //   slider_range[1]+")";
 
-  });
+  // //stri1 + '[' + values[0] + '..' + values[1] + ']' + JSON.stringify(train).replace(/\\/g, '');
+
+  // });
 
 </script>
 
