@@ -38,6 +38,15 @@ integrity="sha256-9tv51T541jtZpCqXhOj30kJqKPohDUb5sWC/pDOWhdw=" crossorigin="ano
   integrity="sha256-urdToxLPXuYm080ktiq7N5La34Myng2dMmqPUGHJF9w=" crossorigin="anonymous">
 </script>
 
+<!-- lodash   -->
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"
+  integrity="sha256-qXBd/EfAdjOA2FGrGAG+b3YBn2tn5A6bhz+LSgYD96k=" crossorigin="anonymous">
+</script>
+
+<!-- canvas2svg -->
+<script type="text/javascript" src="{{ url_for('static', filename='canvas2svg.js') }}"></script>
+
+
 <style>
 * {
   box-sizing: border-box;
@@ -132,7 +141,7 @@ body {
           id: 1000,
           x: x,
           y: y,
-          label: "Unity",
+          label: "U",
           group: "Unity",
           value: 1,
           fixed: true,
@@ -142,7 +151,7 @@ body {
           id: 1001,
           x: x,
           y: y + step,
-          label: "Area",
+          label: "A",
           group: "Area",
           value: 1,
           fixed: true,
@@ -152,7 +161,7 @@ body {
           id: 1002,
           x: x,
           y: y + 2 * step,
-          label: "Sub Area",
+          label: "S",
           group: "Sub_Area",
           value: 1,
           fixed: true,
@@ -162,7 +171,7 @@ body {
           id: 1003,
           x: x,
           y: y + 3 * step,
-          label: "Node",
+          label: "N",
           group: "Node",
           value: 1,
           fixed: true,
@@ -172,18 +181,17 @@ body {
           id: 1004,
           x: x,
           y: y + 4 * step,
-          label: "Module",
+          label: "M",
           group: "Module",
           value: 1,
           fixed: true,
           physics: false,
         });
-
         nodes.push({
           id: 1005,
           x: x,
           y: y + 5 * step,
-          label: "Episode",
+          label: "Ep",
           group: "Episode",
           value: 1,
           fixed: true,
@@ -193,9 +201,29 @@ body {
           id: 1006,
           x: x,
           y: y + 6 * step,
-          label: " Occur ",
-          group: "Occurrence",
+          label: "Al",
+          group: "Alarm",
           value: 1,
+          fixed: true,
+          physics: false,
+        });
+        nodes.push({
+          id: 1007,
+          x: x,
+          y: y + 7 * step,
+          label: "Ev",
+          group: "Event",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });        
+        nodes.push({
+          id: 1008,
+          x: x,
+          y: y + 25 * step,
+          label: "Oc",
+          group: "Occurrence",
+          value: 2,
           fixed: true,
           physics: false,
         });
@@ -240,7 +268,7 @@ body {
             },
             Module: {
               shape: "triangle",
-              color: "red", 
+              color: "green", 
             },
             Episode: {
               shape: "dot",
@@ -248,8 +276,16 @@ body {
             },
             Occurrence: {
               shape: "database",
-              color: { border: "black", background: "white" },
-            },            
+              color: { border: "white", background: "lightgray" },
+            },    
+            Alarm: {
+              shape: "dot",
+              color: { border: "white", background: "tomato" },
+            },
+            Event: {
+              shape: "dot",
+              color: { border: "white", background: "lightblue" },
+            },
           },
         };
         legend = new vis.Network(container, data, options);
@@ -258,13 +294,14 @@ body {
 
     <script type="text/javascript">
         //get config and draw with neovis.js
-        var viz;
-    
+        //var viz;
+        
         function draw(config) {
 
           //console.dir(config);
           viz = new NeoVis.default(config);
           viz.render();
+          //viz.draw()
           //console.log(viz);
           //console.log(viz.nodes.get()[0].raw['properties']);
     
@@ -296,7 +333,7 @@ body {
             return final_obj;
         }
         
-        //insert a string in plase of a marker
+        //insert a string in place of a marker
         // function insert_string(cypher_str) {
         //   var args = [].slice.call(arguments, 1), i = 0;
 
@@ -325,10 +362,13 @@ body {
     <input type="submit" value="Draw" id="reload">
   </div>
   <div id="legend"></div>
+
+  <input type="button" onclick="exportSvg();" value="Export SVG" />
   <div id="viz"></div>
 </div>
 
 <div id="slider"></div>
+
 <!-- <div id="legend"></div> -->
 
 <script>
@@ -350,7 +390,7 @@ body {
     const initconf = {
     "container_id": "viz",
       "neo4j": {
-        "server_url": "neo4j://10.42.0.131:7687",
+        "server_url": "neo4j://10.42.0.2:7687",
         "server_user": "",
         "server_password": ""
      },
@@ -365,14 +405,18 @@ body {
 </body>
 
 <script>
+
 	$(document).ready(function () {
     draw_legend();
     draw(initconf);
 	})
 
+  var conf;
+
 	$("#reload").click(function () {
     var updatedJson = editor.get();
-    var conf = parse_json2obj(updatedJson, {});
+    //var conf = parse_json2obj(updatedJson, {});
+    conf = parse_json2obj(updatedJson, {});
 
     //adding time slot filter to the cypher query
     //conf.initial_cypher = insert_string(conf.initial_cypher.toString(), slot_filter);
@@ -381,7 +425,8 @@ body {
     conf.initial_cypher = conf.initial_cypher.replace(/%t/g,slot_select);
     console.log(conf.initial_cypher);
     //conf = parse('hello %s, how are you doing', my_name);
-    draw_legend();
+    
+    //draw_legend();
 		draw(conf);
 	})
 
@@ -401,7 +446,7 @@ body {
       
       nslots = viz.nodes.get()[0].raw['properties']['total_slots'];
       nslots = parseInt(nslots);
-      
+      nslots=402;
       let stepsSlider = document.getElementById('slider');
       
       noUiSlider.create(stepsSlider, {
@@ -445,7 +490,7 @@ body {
 
       clearInterval(checkExist);
     }
-  }, 50); // check every 100ms
+  }, 100); // check every 100ms
   
   
 
