@@ -191,7 +191,7 @@ body {
           id: 1005,
           x: x,
           y: y + 5 * step,
-          label: "Ep",
+          label: "EP",
           group: "Episode",
           value: 1,
           fixed: true,
@@ -201,7 +201,7 @@ body {
           id: 1006,
           x: x,
           y: y + 6 * step,
-          label: "Al",
+          label: "AL",
           group: "Alarm",
           value: 1,
           fixed: true,
@@ -211,7 +211,7 @@ body {
           id: 1007,
           x: x,
           y: y + 7 * step,
-          label: "Ev",
+          label: "EV",
           group: "Event",
           value: 1,
           fixed: true,
@@ -220,13 +220,44 @@ body {
         nodes.push({
           id: 1008,
           x: x,
-          y: y + 25 * step,
-          label: "Oc",
+          y: y + 8 * step,
+          label: "OC",
           group: "Occurrence",
-          value: 2,
+          value: 3,
           fixed: true,
           physics: false,
         });
+        nodes.push({
+          id: 1009,
+          x: x,
+          y: y + 9 * step,
+          label: "EV",
+          group: "Event2",
+          value: 1,
+          fixed: false,
+          physics: false,
+        });
+        nodes.push({
+          id: 1010,
+          x: x,
+          y: y + 10 * step,
+          label: "AL",
+          group: "Alarm2",
+          value: 1,
+          fixed: false,
+          physics: false,
+        });
+        nodes.push({
+          id: 1011,
+          x: x,
+          y: y + 11 * step,
+          label: "AL \n CRIT",
+          group: "Alarm",
+          value: 1,
+          fixed: true,
+          physics: false,
+        });
+        
 
         // create a network
         var container = document.getElementById("legend");
@@ -285,6 +316,14 @@ body {
             Event: {
               shape: "dot",
               color: { border: "white", background: "lightblue" },
+            },
+            Event2: {
+              shape: "hexagon",
+              color: { border: "white", background: "lightblue" },
+            },
+            Alarm2: {
+              shape: "dot",
+              color: { border: "white", background: "lightgreen" },
             },
           },
         };
@@ -390,7 +429,7 @@ body {
     const initconf = {
     "container_id": "viz",
       "neo4j": {
-        "server_url": "neo4j://10.42.0.2:7687",
+        "server_url": "neo4j://10.42.0.11:7687",
         "server_user": "",
         "server_password": ""
      },
