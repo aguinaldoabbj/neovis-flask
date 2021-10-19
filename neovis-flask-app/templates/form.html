@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>Graph Editor - Canvas</title>
+<title>KGAE - Canvas</title>
 <meta charset="utf-8">
 
 <!-- jsoneditor CSS -->
@@ -45,6 +45,13 @@ integrity="sha256-9tv51T541jtZpCqXhOj30kJqKPohDUb5sWC/pDOWhdw=" crossorigin="ano
 
 <!-- canvas2svg -->
 <script type="text/javascript" src="{{ url_for('static', filename='canvas2svg.js') }}"></script>
+
+<!-- File Saver -->
+<script src="https://cdn.jsdelivr.net/npm/filesaver.js@1.3.4/FileSaver.min.js"
+  integrity="sha256-5IjlS/EkXaEXRrVOMusSOlmQsyFy3DvCD5QC5mJZubU=" crossorigin="anonymous"></script>
+
+<!-- File Reader -->
+<script src="https://bgrins.github.io/filereader.js/filereader.js"></script>
 
 
 <style>
@@ -347,31 +354,60 @@ body {
         }
 
         //better parse Neovis stuff in JSON (dynamic nested objects)
-        function parse_json2obj(obj, final_obj) {
+        // function parse_json2obj(obj, final_obj) {
+        //     for (const [key, value] of Object.entries(obj)) {
+        //       try {
+        //         var k = key.replace(/[\[\]']+/g, '');
+        //         // 'Node' is a native JS code func
+        //         if (k != 'Node') { k = eval(k); }
+        //       } catch (e) { }
+
+        //       try {
+        //         //var v = "";
+        //         v = eval(value);
+        //       } catch (e) { }
+
+        //       if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+        //         final_obj[k] = {}
+        //         parse_json2obj(value, final_obj[k]);
+        //       } else if (v && typeof v === 'function') {
+        //         final_obj[k] = v;
+        //       } else {
+        //         final_obj[k] = value;
+        //         }
+        //     }
+        //     return final_obj;
+        // }
+
+          function parse_json2obj(obj, final_obj) {
             for (const [key, value] of Object.entries(obj)) {
-              try {
-                var k = key.replace(/[\[\]']+/g, '');
-                // 'Node' is a native JS code func
-                if (k != 'Node') { k = eval(k); }
-              } catch (e) { }
+              
+              // try {
+              //   var k = key.replace(/[\[\]']+/g, '');
+              //   // 'Node' is a native JS code func
+              //   if (k != 'Node') { k = eval(k); }
+              // } catch (e) { }
+              var k = key;
 
-              try {
-                var v = "";
-                v = eval(value);
-              } catch (e) { }
+                try {
+                  var v = "";
+                  v = eval(value);
+                } catch (e) { }
 
-              if (value && typeof value === 'object' && Object.keys(value).length > 0) {
-                final_obj[k] = {}
-                parse_json2obj(value, final_obj[k]);
-              } else if (v && typeof v === 'function') {
-                final_obj[k] = v;
-              } else {
-                final_obj[k] = value;
-                }
+                if (value && typeof value === 'object' && Object.keys(value).length > 0) {
+                  final_obj[k] = {}
+                  parse_json2obj(value, final_obj[k]);
+                } else if (v && typeof v === 'function') {
+                  final_obj[k] = v;
+                } else {
+                  final_obj[k] = value;
+                }                
+
             }
             return final_obj;
-        }
-        
+          }        
+
+              
         //insert a string in place of a marker
         // function insert_string(cypher_str) {
         //   var args = [].slice.call(arguments, 1), i = 0;
@@ -391,13 +427,15 @@ body {
 <body>
 
 <div class="header">
-  <h1>Graph Canvas</h1>
+  <h1>KGAE Vis</h1>
   <input type="submit" value="Stabilize" id="stabilize">
 </div>
 
 <div class="row">
   <div id="editor">
     <h2 style="text-align:left;">Config Editor</h2>
+    <input type="file" id="loadDocument" value="Load" />
+    <input type="button" id="saveDocument" value="Save" />
     <input type="submit" value="Draw" id="reload">
   </div>
   <div id="legend"></div>
@@ -426,18 +464,68 @@ body {
     }
     
     //initial neovis config JSON
+    // const initconf = {
+    // "container_id": "viz",
+    //   "neo4j": {
+    //     "server_url": "neo4j://10.42.0.39:7687",
+    //     "server_user": "",
+    //     "server_password": ""
+    //  },
+    //  "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
+    // }
+
+    //Get server from query string
+    var neo4j_server = '{{ query }}';
+    neo4j_server_uri = 'neo4j://'+ neo4j_server + ':7687';
+
+    //Conf to be loaded on page load
     const initconf = {
-    "container_id": "viz",
-      "neo4j": {
-        "server_url": "neo4j://10.42.0.11:7687",
-        "server_user": "",
-        "server_password": ""
-     },
-     "initial_cypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
+            "containerId": "viz",
+            "neo4j": {
+              "serverUrl": "neo4j://localhost:7687",
+              "serverUser": "",
+              "serverPassword": ""
+            },
+            "initialCypher": "MATCH p=()-[]-() RETURN p LIMIT 100"
     }
 
+    //Update server address
+    initconf['neo4j']['serverUrl'] = neo4j_server_uri;
+
+    //Loading initconf into the editor
     const editor = new JSONEditor(container, options, initconf)
-    //const updatedJson = editor.get()
+
+  var filename='';
+  // Load a JSON document to the editor
+    FileReaderJS.setupInput(document.getElementById('loadDocument'), {
+      readAsDefault: 'Text',
+      on: {
+        load: function (event, file) {
+          filename=file.name;
+          editor.setText(event.target.result);
+        }
+      }
+    })
+
+    // Save a JSON document
+    document.getElementById('saveDocument').onclick = function () {
+      // Save Dialog
+      
+      let fname = window.prompt("Save as...", filename);
+      // Check json extension in file name
+      if (fname.indexOf(".") === -1) {
+        fname = fname + ".json";
+      } else {
+        if (fname.split('.').pop().toLowerCase() === "json") {
+          // Nothing to do
+        } else {
+          fname = fname.split('.')[0] + ".json";
+        }
+      }
+      const blob = new Blob([editor.getText()], { type: 'application/json;charset=utf-8' });
+      saveAs(blob, fname);
+    }
+
   </script>
 
 
@@ -448,25 +536,36 @@ body {
 	$(document).ready(function () {
     draw_legend();
     draw(initconf);
+    //draw(parse_json2obj2(initconf), {});
 	})
 
   var conf;
 
 	$("#reload").click(function () {
     var updatedJson = editor.get();
+    //var updatedJson = JSON.parse(editor.get());
     //var conf = parse_json2obj(updatedJson, {});
     conf = parse_json2obj(updatedJson, {});
+    //conf = JSON.parse(updatedJson);
+    //var conf = updatedJson;
+
+    //var conf = parseIt(updatedJson);
+
+    conf['initialCypher'] = conf['initialCypher'].replace(/%s/g, slot_filter);
+    conf['initialCypher'] = conf['initialCypher'].replace(/%t/g, slot_select);
 
     //adding time slot filter to the cypher query
     //conf.initial_cypher = insert_string(conf.initial_cypher.toString(), slot_filter);
     //conf.initial_cypher = insert_string(conf.initial_cypher.toString(), slot_select);
-    conf.initial_cypher = conf.initial_cypher.replace(/%s/g,slot_filter);
-    conf.initial_cypher = conf.initial_cypher.replace(/%t/g,slot_select);
-    console.log(conf.initial_cypher);
+    //conf.initialCypher = conf.initialCypher.replace(/%s/g,slot_filter);
+    //conf.initialCypher = conf.initialCypher.replace(/%t/g,slot_select);
+
+    //console.log(conf.initialCypher);
     //conf = parse('hello %s, how are you doing', my_name);
     
     //draw_legend();
 		draw(conf);
+    
 	})
 
 	$("#stabilize").click(function () {
@@ -483,13 +582,14 @@ body {
   var checkExist = setInterval(function () {
     if ($('#viz').length) {
       
+      //number of slots got from tree root
       nslots = viz.nodes.get()[0].raw['properties']['total_slots'];
       nslots = parseInt(nslots);
-      nslots=402;
+      //nslots=402;
       let stepsSlider = document.getElementById('slider');
       
       noUiSlider.create(stepsSlider, {
-        start: [0, 1],
+        start: [0, 0],
         connect: true,
         tooltips: [wNumb({ decimals: 0 }), wNumb({ decimals: 0 })],
         range: {
@@ -515,47 +615,34 @@ body {
         //getting values from slider (adding 1 to make inclusive in neo4j)
         values = [Math.trunc(values[0]), Math.trunc(values[1]) + 1];
 
-        //defining filter for time slots in for a cypher query
-        slot_filter = "WHERE split(n.activations_train, '')" + "[" + values[0] + ".." + values[1] + "] = "
-          + JSON.stringify(interval_getter(values));
+        slot_filter = '';
+        slot_select = '';
 
-        slot_select = "WHERE n.time_slot in range(" + slider_range[0] + "," +
-          slider_range[1] + ")" + " AND o.time_slot in range(" + slider_range[0] + "," +
-          slider_range[1] + ")";
+        if (! _.isEqual(slider_range,[0,0])) {
+
+        //defining filter for time slots in for a cypher query
+        // slot_filter = "WHERE split(n.activations_train, '')" + "[" + values[0] + ".." + values[1] + "] = "
+        //   + JSON.stringify(interval_getter(values));
+        slot_filter = "MATCH (n) WHERE split(n.activations_train, '')" + "[" + values[0] + ".." + values[1] + "] = "
+           + JSON.stringify(interval_getter(values));
+
+        // slot_select = "WHERE n.time_slot in range(" + slider_range[0] + "," +
+        //   slider_range[1] + ")" + " AND o.time_slot in range(" + slider_range[0] + "," +
+        //   slider_range[1] + ")";
+
+        slot_select = "MATCH (n) WHERE n.time_slot in range(" + slider_range[0] + "," +
+            slider_range[1] + ")";
 
         //stri1 + '[' + values[0] + '..' + values[1] + ']' + JSON.stringify(train).replace(/\\/g, '');
+        }
 
-      });
+      }); 
 
       clearInterval(checkExist);
     }
   }, 100); // check every 100ms
   
   
-
-  //console.log(nslots);
-  //interval slider to filter time slots
-  //var stepsSlider = document.getElementById('slider');
-  //var nslots = '{{ query }}';
-  
-  // noUiSlider.create(stepsSlider, {
-  //   start: [0, 1],
-  //   connect: true,
-  //   tooltips: [wNumb({ decimals: 0 }), wNumb({ decimals: 0 })],
-  //   range: {
-  //     'min': [0],
-  //     //'10%': [10, 10],
-  //     //'50%': [80, 50],
-  //     //'80%': 150,
-  //     'max': nslots-1,
-  //   },
-  //   step: 1,
-  //   pips: {
-  //     mode: 'steps',
-  //     stepped: true,
-  //     density: 1
-  //   }
-  // });
 
   function interval_getter(range){
 

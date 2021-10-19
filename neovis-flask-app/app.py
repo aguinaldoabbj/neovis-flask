@@ -30,10 +30,11 @@ def editor():
 
 @app.route("/form", methods=['GET'])
 def form():
-    nslots = request.args.get('nslots', type = int)
+    #nslots = request.args.get('nslots', type = int)
+    neo4j_server = request.args.get('neo4j_server', type=str)
     #print(nslots)
     try:
-        return render_template('form.html', query=nslots)
+        return render_template('form.html', query=neo4j_server)
     except:
         return render_template('error.html')
 
